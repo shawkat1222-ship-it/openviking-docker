@@ -1,0 +1,10 @@
+{
+  "provider": "ollama",
+  "embedding_model": "nomic-embed-text",
+  "vlm_model": "mistral",
+  "api_base": "http://localhost:11434",
+  "api_key": "",
+  "workspace": "/app/.openviking/workspace",
+  "port": 1933,
+  "host": "0.0.0.0"
+}

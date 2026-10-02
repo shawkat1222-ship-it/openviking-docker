@@ -1,0 +1,63 @@
+version: '3.8'
+
+# Production-ready setup with optional GPU support and monitoring
+# Usage: 
+#   - Basic: docker compose up
+#   - With GPU: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+#   - With monitoring: docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up
+
+services:
+  openviking-complete:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openviking-complete:latest
+    container_name: openviking-complete
+    ports:
+      - "1933:1933"      # OpenViking server
+      - "11434:11434"    # Ollama API
+    volumes:
+      - openviking_data:/app/.openviking
+      - ollama_data:/root/.ollama
+      - ./ov.conf.example:/app/.openviking/ov.conf.example:ro
+    environment:
+      # OpenViking Configuration
+      OPENVIKING_CONFIG_FILE: /app/.openviking/ov.conf
+      OPENVIKING_SETUP_MODE: "1"  # 1=Ollama(default), 2=Volcengine, 3=OpenAI
+      
+      # Ollama Configuration
+      OLLAMA_HOST: "0.0.0.0:11434"
+      OLLAMA_MODELS: /root/.ollama/models
+      
+      # Optional GPU support (uncomment if using GPU):
+      # OLLAMA_GPU: "1"  # Enable GPU
+      # CUDA_VISIBLE_DEVICES: "0"  # Specify GPU device
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: 
+        - CMD
+        - sh
+        - -c
+        - "curl -f http://localhost:1933/health && curl -f http://localhost:11434/api/tags"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  openviking_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+networks:
+  default:
+    name: openviking-net

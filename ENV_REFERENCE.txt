@@ -1,0 +1,147 @@
+# Environment Variables Reference
+# Use these to customize container behavior without editing files
+
+## OpenViking Configuration
+
+# Path to config file (default: /app/.openviking/ov.conf)
+OPENVIKING_CONFIG_FILE=/app/.openviking/ov.conf
+
+# Config file in JSON format (used if config file doesn't exist)
+# Example: OPENVIKING_CONF_CONTENT='{"provider":"ollama","embedding_model":"nomic-embed-text","vlm_model":"mistral","api_base":"http://localhost:11434"}'
+OPENVIKING_CONF_CONTENT=
+
+# Automatic setup mode on first run (1=Ollama, 2=Volcengine, 3=OpenAI)
+OPENVIKING_SETUP_MODE=1
+
+# CLI config file path
+OPENVIKING_CLI_CONFIG_FILE=/app/.openviking/ovcli.conf
+
+# Home directory
+HOME=/app
+
+# Python path for OpenViking
+PATH=/app/.venv/bin:$PATH
+
+## Ollama Configuration
+
+# Ollama API bind address (default: 0.0.0.0:11434)
+OLLAMA_HOST=0.0.0.0:11434
+
+# Model cache directory
+OLLAMA_MODELS=/root/.ollama/models
+
+# Enable GPU acceleration (set to "1" to enable)
+# Requires NVIDIA Docker runtime and compatible GPU
+OLLAMA_GPU=0
+
+# GPU device to use (e.g., "0" for first GPU, "0,1" for multiple)
+CUDA_VISIBLE_DEVICES=0
+
+# Keep model loaded in memory (seconds, 0 = keep loaded)
+OLLAMA_KEEP_ALIVE=5m
+
+# Verbose logging
+OLLAMA_DEBUG=0
+
+## Supervisor Configuration (Process Manager)
+
+# Number of processes to spawn (default: 1)
+# Note: supervisord always single instance, this affects other configs
+SUPERVISOR_NUM_PROCESSES=1
+
+# Log level (debug, info, warn, error, critical)
+SUPERVISOR_LOG_LEVEL=info
+
+## Performance Tuning
+
+# Python bytecode compilation
+UV_COMPILE_BYTECODE=1
+
+# Link mode for uv (copy, symlink)
+UV_LINK_MODE=copy
+
+# Skip dev dependencies
+UV_NO_DEV=1
+
+# Cargo target directory (for builds)
+CARGO_TARGET_DIR=/cargo-target
+
+# ccache directory for C++ builds
+CCACHE_DIR=/root/.ccache
+
+## Optional: Specific Model Configuration
+
+# Embedding model to use
+# Options: nomic-embed-text (default), all-minilm, bge-small, bge-large-en
+# Note: Set in ov.conf, this is reference only
+OPENVIKING_EMBEDDING_MODEL=nomic-embed-text
+
+# VLM (Vision Language Model) for bot
+# Options: mistral (default), phi2, neural-chat, dolphin-mixtral
+# Note: Set in ov.conf, this is reference only
+OPENVIKING_VLM_MODEL=mistral
+
+# Ollama API base URL
+# Used by OpenViking to connect to Ollama
+OPENVIKING_LLM_API_BASE=http://localhost:11434
+
+## Optional: Provider-specific (if not using Ollama)
+
+# Volcengine API configuration
+VOLCENGINE_API_KEY=
+VOLCENGINE_API_BASE=https://api.arkose.volcengine.com
+
+# OpenAI API configuration
+OPENAI_API_KEY=
+OPENAI_API_BASE=https://api.openai.com/v1
+
+# Kimi API configuration
+KIMI_API_KEY=
+KIMI_API_BASE=https://api.moonshot.cn/v1
+
+# Custom/other provider
+CUSTOM_API_KEY=
+CUSTOM_API_BASE=
+
+## Example: Docker Compose Override
+
+# Use in docker-compose.yml environment section:
+# environment:
+#   OPENVIKING_CONFIG_FILE: /app/.openviking/ov.conf
+#   OPENVIKING_SETUP_MODE: "1"
+#   OLLAMA_HOST: "0.0.0.0:11434"
+#   OLLAMA_GPU: "1"  # Enable GPU
+#   CUDA_VISIBLE_DEVICES: "0"
+
+## Example: Docker Run with Variables
+
+# docker run -d \
+#   -e OPENVIKING_SETUP_MODE=1 \
+#   -e OLLAMA_HOST=0.0.0.0:11434 \
+#   -e OLLAMA_GPU=1 \
+#   -p 1933:1933 -p 11434:11434 \
+#   -v ~/.openviking:/app/.openviking \
+#   -v ~/.ollama:/root/.ollama \
+#   openviking-complete
+
+## Example: For GPU Support with Docker Compose
+
+# environment:
+#   OLLAMA_HOST: "0.0.0.0:11434"
+#   OLLAMA_GPU: "1"
+#   CUDA_VISIBLE_DEVICES: "0"  # First GPU
+# deploy:
+#   resources:
+#     reservations:
+#       devices:
+#         - driver: nvidia
+#           count: 1
+#           capabilities: [gpu]
+
+## Notes
+
+# 1. Variables set at container runtime override Dockerfile defaults
+# 2. Not all variables need to be set; defaults are provided
+# 3. Sensitive data (API keys) should use Docker secrets in production
+# 4. For multi-GPU setups, comma-separate device IDs: "0,1,2"
+# 5. Keep-alive values: "5m" (5 minutes), "24h" (24 hours), "0" (indefinite)

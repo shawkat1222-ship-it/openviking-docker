@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  openviking-complete:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openviking-complete:latest
+    container_name: openviking-complete
+    ports:
+      - "1933:1933"      # OpenViking server
+      - "11434:11434"    # Ollama API
+    volumes:
+      - openviking_data:/app/.openviking
+      - ollama_data:/root/.ollama
+    environment:
+      # OpenViking Configuration
+      OPENVIKING_CONFIG_FILE: /app/.openviking/ov.conf
+      OPENVIKING_SETUP_MODE: "1"  # 1=Ollama, 2=Volcengine, 3=OpenAI
+      
+      # Ollama Configuration
+      OLLAMA_HOST: "0.0.0.0:11434"
+      OLLAMA_MODELS: /root/.ollama/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1933/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  openviking_data:
+    driver: local
+  ollama_data:
+    driver: local

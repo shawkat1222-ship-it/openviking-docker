@@ -1,0 +1,17 @@
+# GPU support override for docker-compose
+# Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+
+version: '3.8'
+
+services:
+  openviking-complete:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      OLLAMA_GPU: "1"
+      CUDA_VISIBLE_DEVICES: "0"
